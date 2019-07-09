@@ -77,7 +77,7 @@ tests:
 
 dist:
 #build the distribution tarbell
-	tar -cvzf lab0-004912373.tar.gz $(files)
+	tar -cvzf lab0-#########.tar.gz $(files)
 
 clean:
 #remove all files created by Makefile
