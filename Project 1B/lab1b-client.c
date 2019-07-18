@@ -390,7 +390,7 @@ int main(int argc, char* argv[]){
 
   //log handling
   if(LOGFILE != NULL){
-    //0644 = Owner:RW Group:R Other:R
+    //0666 = Owner, Group, Other:RW
     logfd = open(LOGFILE, O_RDWR | O_APPEND | O_CREAT, 0666);
     if (logfd < 0){
       fprintf(stderr, "Error opening log file: %s\n", strerror(errno));
