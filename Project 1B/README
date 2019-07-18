@@ -1,6 +1,6 @@
 NAME: Adam Cole
-EMAIL: adam.cole5621@gmail.com
-ID: 004912373
+EMAIL: ###########@gmail.com
+ID: #########
 
 lab1b-client.c
 
@@ -19,12 +19,11 @@ lab1b-server.c
 
 	A source file that, when compiled, executes the local server
 	on a specified --port=PORT, which is required.  The server will
-	execute a specified program, given by the required option
-	--shell=PROGRAM.  In our case, the program will be /bin/bash to
-	execute a shell.  If the --encrypt=KEYFILE option is used, the
-	server will encrypt the data sent to the client using the keyfile
-	specified in the argument.  The server will report the shell exit
-	status and signal when the client sends an EOF (^D) or kill (^C). 
+	execute /bin/bash to execute a shell.  If the --encrypt=KEYFILE
+	option is used, the server will encrypt the data sent to the 
+	client using the keyfile specified in the argument.  The server
+	will report the shell exit status and signal when the client
+	sends an EOF (^D) or kill (^C). 
 
 my.key
 
@@ -45,10 +44,11 @@ Makefile
 		 Makefile, my.key, lab1b-client.c, lab1b-server.c
 
 Usage
-	$ ./lab1b-server --shell=/bin/bash --port=4500 --encrypt=my.key
+	$ ./lab1b-server --port=4500 --encrypt=my.key
 	$ ./lab1b-client --port=4500 --log=log.txt --encrypt=my.key
 
 References
 
 	Zhou and Tirad TA Slides
 	Manual pages for all library API
+	
