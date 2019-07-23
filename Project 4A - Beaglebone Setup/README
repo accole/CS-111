@@ -1,0 +1,36 @@
+NAME: Adam Cole
+EMAIL: adam.cole5621@gmail.com
+ID: 004912373
+
+my_beaglebone.jpg
+	A selfie of me holding my assembled Beaglebone showing the front
+	of the board.
+
+connected.png
+	A screenshot from a USB terminal session connted to my laptop,
+	showing that I configured network access and renamed my device.
+
+	IP:	192.168.1.12
+	Serial:	BBGW16062690
+	MAC:	2CF7F1065384
+
+copy.png
+	A screenshot from a local session where I copy a simple hello world
+	program from my Laptop to my Beaglebone using PSCP.
+
+build_run.jpg
+	A screenshot from a WIFI SSH session where I build and execute the
+	simple hello world program from my Beaglebone.
+
+git.png
+	A screenshot from a WIFI SSH session where I clone a test repository
+	from my Github into my Beaglebone.
+
+Makefile
+
+	clean:	cleans the current directory to contain only the submission
+		files README, Makefile, copy.png, connected.png, git.png,
+		my_beaglebone.jpg, and build_run.png
+	dist:	creates a tarbell for submission including only the files
+		README, Makefile, copy.png, connected.png, git.png,
+		my_beaglebone.jpg, and build_run.png
