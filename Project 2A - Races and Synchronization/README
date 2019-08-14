@@ -1,0 +1,144 @@
+NAME: Adam Cole
+EMAIL: adam.cole5621@gmail.com
+ID: 004912373
+
+
+QUESTION 2.1.1 - Causing Conflicts:
+
+	 When testing race conditions with a small number of iterations, the
+	 variable usually ends up being the correct value in the end.  This
+	 is because the smaller number of iterations, the more likely it is
+	 that the thread is able to finish its work in the critical section
+	 without being interrupted by another thread that was created later.
+	 Therefore, the larger the iterations, the more obvious the race
+	 condition becomes.
+
+QUESTION 2.1.2 - Cost of Yielding:
+
+	 Yield runs are so much slower because when the user indicates they
+	 want the program to yield, each thread calls sched_yield() in the
+	 subroutine.  By doing this, each thread is added to a queue.  The
+	 additional time is given to threads waiting in the queue and also
+	 the overhead associated with the function call and the context switch.  
+	 
+	 It is not possible to get valid per-operation timings if we use the
+	 --yield option because the overall time accounts for context switching
+	 and overhead - not just the inserting, searching, and deleting
+	 operations our program runs in the critical section.
+
+QUESTION 2.1.3 - Measurement Errors:
+
+	 The overhead cost of creating a thread greatly increases the average
+	 cost per operation when it is only split between a small number of
+	 iterations. When the number of iterations is increased, the overhead
+	 of creating the threads (which is time that technically should not be
+	 reported) is distributed thinner and thinner between the operations.
+	 
+	 Using our created GNU plots, we can find the correct cost per iteration
+	 by examining the graph which plots operation cost.  As the graph stops
+	 decreasing exponentially at a large number of operations, a realistic
+	 value of cost per operation can be seen.
+
+QUESTION 2.1.4 - Costs of Serialization:
+
+	Different synchronization tactics perform differently at a high number
+	of threads since they all have different ways of waiting for access
+	to the resource - and some are more efficient than others.  At a small
+	number of threads, the amount of time spent in the critical section
+	is smaller, and therefore the minute differences in lock efficiencies
+	are not as highlighted as a high number of threads.
+
+	Each of the synchronization tactics increases as the number of threads
+	increase because as more and more threads wait for the resource, a
+	larger and larger bottleneck is created by the resource.  This makes
+	performance noticeably worse. 
+
+QUESTION 2.2.1 - Scalability of Mutex:
+
+	 The Cost/Operation trend for mutexes consistently stays linear for
+	 both the shared varibale addition in part 1 and the doubley linked
+	 list in part 2.  Mutexes create this linear shape because as the
+	 number of threads increase, so does the cost of each operation as
+	 the bottleneck created waiting for the resource increases.  It is
+	 linear because for every added thread, there is a set amount of
+	 computation the CPU must execute.  This is unlike spin locks, which
+	 would increase exponentially.  The slope of the linear trend in part
+	 2 is much larger than in part 1 because there is more computation
+	 associated with the linked list operations than the simple addition.
+
+QUESTION 2.2.2 - Scalability of Spin Locks:
+
+	 Both locks see an increase in cost/operation cost as expected, since
+	 more threads must compete for the available resource and create a
+	 bottleneck which affects performance.
+
+	 Spin locks become especially inefficient as the number of threads
+	 increases since Spin locks already burn cycles with meaningless
+	 computation while waiting for the resource.  Mutexes, however, put
+	 threads to sleep while they wait for the resource so they do better
+	 at a higher number of threads.
+
+lab2_add.c
+	When compiled, lab2_add runs performance tests on a simple shared
+	variable add function with different synchronization locking tools.
+	The executable has options to yield, synchronize with distinct locks,
+	and users distinguish the amount of threads and iterations the
+	program will use to analyze the change in the shared variable.
+
+SortedList.h
+	Header file given in the spec which defines the doubley linked list
+	and its available functions.  Here, INSERT_YIELD, DELETE_YIELD, and
+	LOOKUP_YIELD are all defined.
+
+SortedList.c
+	Implementations of the header file functions insert, search, delete,
+	and length which are defined in the header file provided.  Each of
+	these functions includes critical sections which are synchronized by
+	locks used in lab2_list and through YIELD options defined in the
+	implementations.
+
+lab2_list.c
+	When compiled, lab2_list runs performance tests on a complex shared
+	doubley linked list with different synchronization locking tools.
+	The executable has options to yield, synchronize with distinct locks,
+	and users distinguish the amount of threads and iterations the
+	program will use to analyze the outcome with the shared list. Instead
+	of one function to update the shared list, the program will insert, 
+	traverse, search, and delete elements from the linked list.  Users
+	have the options to yield in any or all of these functions through the
+	--yield=SECTIONS command line option.
+
+lab2_add.csv
+	CSV files containing the output data from the tests run on lab2_add
+	and is used by lab2_add.gp to create plots below
+
+lab2_list.csv
+	CSV files containing the output data from the tests run on lab2_list
+	and is used by lab2_list.gp to create plots below
+
+lab2_add-1.png
+lab2_add-2.png
+lab2_add-3.png
+lab2_add-4.png
+lab2_add-5.png
+	Output graphs based on performance of different synchronization
+	tactics created with given lab2_add.gp source code.
+
+lab2_list-1.png
+lab2_list-2.png
+lab2_list-3.png
+lab2_list-4.png
+lab2_list-5.png
+	Output graphs based on performance of different synchronization
+	tactics created with given lab2_list.gp source code.
+
+Makefile
+
+	build:  compiles and builds executables for both lab2_add.c and
+		lab2_list.c using gcc and the correct flags
+	tests:	runs the tests given by the spec to test lab2_add and lab2_list
+	graphs:	builds, cleans, and tests the executables lab2_add and lab2_list
+		then creates GNUplots using lab2_add.gp and lab2_list.gp
+	dist:	creates a tarbell for submission
+	clean:  cleans the current directory to contain only the submission
+		files
