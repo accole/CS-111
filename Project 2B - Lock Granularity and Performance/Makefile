@@ -1,6 +1,6 @@
 #NAME: Adam Cole
-#EMAIL: adam.cole5621@gmail.com
-#ID: 004912373
+#EMAIL: ##############@gmail.com
+#ID: ##########
 
 CC = gcc
 CFLAGS = -g -Wall -Wextra -pthread -lprofiler
@@ -186,7 +186,7 @@ testlist:
 
 
 dist:	graphs profile
-	tar -cvzf lab2b-004912373.tar.gz $(files)
+	tar -cvzf lab2b-#########.tar.gz $(files)
 
 clean:
 	rm -f *.o *.txt *.tar.gz lab2_list
