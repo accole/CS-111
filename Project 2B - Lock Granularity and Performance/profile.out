@@ -1,0 +1,492 @@
+ROUTINE ====================== threadfunc in /u/ce/ugrad/adamc/111/P2/B/lab2_list.c
+   696    782 Total samples (flat / cumulative)
+     .      .   55:   hash = (key[0] + key[2]) % numlists;
+     .      .   56:   return hash;
+     .      .   57: }
+     .      .   58: 
+     .      .   59: //multithreading function
+---
+     .      .   60: void * threadfunc(void * t){
+     .      .   61:   long thread = (long)t;
+     .      .   62:   long s = thread * numiterations;
+     .      .   63:   long i = s;
+     .      .   64: 
+     .      .   65:   //insert each element into the SortedList
+     .      .   66:   if (lists){
+     .      .   67:     for (; i < s + numiterations; i++){
+     .      .   68:       const char * curr = listelements[i].key;		//get correct lock to wait on
+     .      .   69:       int hashval = hashing(curr);
+     .      .   70:       if (spin){
+     .      .   71:         struct timespec start;
+     .      .   72:         clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .   73:         while(__sync_lock_test_and_set(&slockArr[hashval], 1));	//lock spin lock
+     .      .   74:         struct timespec finish;					//record time
+     .      .   75:         clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .   76:         long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .   77:         totaltime += finish.tv_nsec;				//convert to nanoseconds
+     .      .   78:         totaltime -= start.tv_nsec;
+     .      .   79:         locktimes[thread] += totaltime;				//store time
+     .      .   80:         SortedList_insert(listArr[hashval], &listelements[i]);	//perform operation
+     .      .   81:         __sync_lock_release(&slockArr[hashval]);		//unlock spin lock
+     .      .   82:       } else if (mutex) {
+     .      .   83:         struct timespec start;
+     .      .   84:         clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .   85:         pthread_mutex_lock(&lockArr[hashval]);			//lock mutex
+     .      .   86:         struct timespec finish;					//record lock time
+     .      .   87:         clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .   88:         long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .   89:         totaltime += finish.tv_nsec;				//convert to nanoseconds
+     .      .   90:         totaltime -= start.tv_nsec;
+     .      .   91:         locktimes[thread] += totaltime;				//store time
+     .      .   92:         SortedList_insert(listArr[hashval], &listelements[i]);	//perform operation
+     .      .   93:         pthread_mutex_unlock(&lockArr[hashval]);		//unlock mutex
+     .      .   94:       } else {
+     .      .   95:         SortedList_insert(listArr[hashval], &listelements[i]);	//no time to record
+     .      .   96:       }
+     .      .   97:     }
+     .      .   98:   } else {	//single list
+     .      .   99:     for (; i < s + numiterations; i++){
+     .      .  100:       if(mutex == 1){
+     .      .  101: 	struct timespec start;
+     .      .  102:         clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  103:         pthread_mutex_lock(&lock);			//lock mutex
+     .      .  104: 	struct timespec finish;				//record lock time
+     .      .  105:         clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .  106: 	long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .  107:         totaltime += finish.tv_nsec;
+     .      .  108:         totaltime -= start.tv_nsec;			//convert to nanoseconds
+     .      .  109:         locktimes[thread] += totaltime;			//store time
+     .      .  110:         SortedList_insert(list, &listelements[i]);	//perform operation
+     .      .  111:         pthread_mutex_unlock(&lock);			//unlock mutex
+     .      .  112:       } else if (spin == 1){
+     .      .  113: 	struct timespec start;
+     .      .  114:         clock_gettime(CLOCK_MONOTONIC, &start);
+   483    483  115:         while(__sync_lock_test_and_set(&slock, 1));	//lock spin lock
+     .      .  116: 	struct timespec finish;				//record lock time
+     .      .  117:         clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .  118: 	long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .  119:         totaltime += finish.tv_nsec;
+     .      .  120:         totaltime -= start.tv_nsec;			//convert to nanoseconds
+     1      1  121:         locktimes[thread] += totaltime;			//store time
+     .     43  122:         SortedList_insert(list, &listelements[i]);	//perform operation
+     .      .  123:         __sync_lock_release(&slock);			//unlock spin lock
+     .      .  124:       } else {
+     .      .  125:         SortedList_insert(list, &listelements[i]);	//no time to record
+     .      .  126:       }
+     .      .  127:     }
+     .      .  128:   }
+     .      .  129:  
+     .      .  130: 
+     .      .  131:   //calculate the length of the list
+     .      .  132:   if (lists){
+     .      .  133:     int m = 0;
+     .      .  134:     for (; m < numlists; m++){
+     .      .  135:       if (spin){
+     .      .  136:         struct timespec start;
+     .      .  137:         clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  138:         while(__sync_lock_test_and_set(&slockArr[m], 1));	//lock spin lock
+     .      .  139:         struct timespec finish;					//record time
+     .      .  140:         clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .  141:         long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .  142:         totaltime += finish.tv_nsec;			//convert to nanoseconds
+     .      .  143:         totaltime -= start.tv_nsec;
+     .      .  144:         locktimes[thread] += totaltime;			//store time
+     .      .  145:         SortedList_length(listArr[m]); 			//perform operation
+     .      .  146:         __sync_lock_release(&slockArr[m]);		//unlock spin lock
+     .      .  147:       } else if (mutex) {
+     .      .  148:         struct timespec start;
+     .      .  149:         clock_gettime(CLOCK_MONOTONIC, &start);		//record time
+     .      .  150:         pthread_mutex_lock(&lockArr[m]);		//lock mutex
+     .      .  151:         struct timespec finish;
+     .      .  152:         clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .  153:         long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .  154:         totaltime += finish.tv_nsec;			//convert to nanoseconds
+     .      .  155:         totaltime -= start.tv_nsec;
+     .      .  156:         locktimes[thread] += totaltime;			//store time
+     .      .  157:         SortedList_length(listArr[m]);			//perform operation
+     .      .  158:         pthread_mutex_unlock(&lockArr[m]);		//unlock mutex
+     .      .  159:       } else {
+     .      .  160:         SortedList_length(listArr[m]);			//no time to record
+     .      .  161:       }
+     .      .  162:     }
+     .      .  163:   } else {              //single list
+     .      .  164:     if (mutex == 1){
+     .      .  165:       struct timespec start;
+     .      .  166:       clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  167:       pthread_mutex_lock(&lock);		//lock mutex
+     .      .  168:       struct timespec finish;			//record lock time
+     .      .  169:       clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .  170:       long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .  171:       totaltime += finish.tv_nsec;
+     .      .  172:       totaltime -= start.tv_nsec;		//convert to nanoseconds
+     .      .  173:       locktimes[thread] += totaltime;		//store time
+     .      .  174:       SortedList_length(list);		//perform operation
+     .      .  175:       pthread_mutex_unlock(&lock);	//lock mutex
+     .      .  176:     } else if (spin == 1){
+     .      .  177:       struct timespec start;
+     .      .  178:       clock_gettime(CLOCK_MONOTONIC, &start);
+     1      1  179:       while(__sync_lock_test_and_set(&slock, 1));	//lock spin lock
+     .      .  180:       struct timespec finish;				//record lock time
+     .      .  181:       clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .  182:       long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .  183:       totaltime += finish.tv_nsec;
+     .      .  184:       totaltime -= start.tv_nsec;		//convert to nanoseconds
+     .      .  185:       locktimes[thread] += totaltime;		//store time
+     .      .  186:       SortedList_length(list);		//perform operation
+     .      .  187:       __sync_lock_release(&slock);	//unlock spin lock
+     .      .  188:     } else {
+     .      .  189:       SortedList_length(list);
+     .      .  190:     }
+     .      .  191:   }
+     .      .  192:   
+     .      .  193: 
+     .      .  194:   i = s;
+     .      .  195:   //lookup and delete each element in the list
+     .      .  196:   if (lists){
+     .      .  197:     for (; i < s + numiterations; i++){
+     .      .  198:       const char * curr = listelements[i].key;		//get correct lock to wait on
+     .      .  199:       int hashval = hashing(curr);
+     .      .  200:       if (spin){
+     .      .  201:         struct timespec start;
+     .      .  202:         clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  203:         while(__sync_lock_test_and_set(&slockArr[hashval], 1));	//lock spin lock
+     .      .  204:         struct timespec finish;					//record time
+     .      .  205:         clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .  206:         long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .  207:         totaltime += finish.tv_nsec;				//convert to nanoseconds
+     .      .  208:         totaltime -= start.tv_nsec;
+     .      .  209:         locktimes[thread] += totaltime;				//store time
+     .      .  210:         SortedListElement_t * find = SortedList_lookup(listArr[hashval], listelements[i].key);
+     .      .  211:         if (find == NULL){
+     .      .  212: 	  fprintf(stderr, "Element not found in SortedList\n");
+     .      .  213: 	  exit(2);
+     .      .  214:         }
+     .      .  215:         SortedList_delete(find);				//perform operations
+     .      .  216:         __sync_lock_release(&slockArr[hashval]);		//unlock spin lock
+     .      .  217:       } else if (mutex) {
+     .      .  218:         struct timespec start;
+     .      .  219:         clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  220:         pthread_mutex_lock(&lockArr[hashval]);			//lock mutex
+     .      .  221:         struct timespec finish;					//record lock time
+     .      .  222:         clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .  223:         long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .  224:         totaltime += finish.tv_nsec;				//convert to nanoseconds
+     .      .  225:         totaltime -= start.tv_nsec;
+     .      .  226:         locktimes[thread] += totaltime;				//store time
+     .      .  227:         SortedListElement_t * find = SortedList_lookup(listArr[hashval], listelements[i].key);
+     .      .  228:         if (find == NULL){
+     .      .  229: 	  fprintf(stderr, "Element not found in SortedList\n");
+     .      .  230: 	  exit(2);
+     .      .  231:         }
+     .      .  232:         SortedList_delete(find);				//perform operations
+     .      .  233:         pthread_mutex_unlock(&lockArr[hashval]);		//unlock mutex
+     .      .  234:       } else {							//no time to record
+     .      .  235:         SortedListElement_t * find = SortedList_lookup(listArr[hashval], listelements[i].key);
+     .      .  236:         if (find == NULL){
+     .      .  237: 	  fprintf(stderr, "Element not found in SortedList\n");
+     .      .  238: 	  exit(2);
+     .      .  239:         }
+     .      .  240:         SortedList_delete(find);				//perform operations
+     .      .  241:       }
+     .      .  242:     }
+     .      .  243:   } else {             //single list
+     .      .  244:     for (; i < s + numiterations; i++){
+     .      .  245:       if (mutex == 1){
+     .      .  246:         struct timespec start;
+     .      .  247:         clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  248:         pthread_mutex_lock(&lock);		//lock mutex
+     .      .  249:         struct timespec finish;			//record lock time
+     .      .  250:         clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .  251:         long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .  252:         totaltime += finish.tv_nsec;
+     .      .  253:         totaltime -= start.tv_nsec;		//convert to nanoseconds
+     .      .  254:         locktimes[thread] += totaltime;		//store time
+     .      .  255:         SortedListElement_t * find = SortedList_lookup(list, listelements[i].key);
+     .      .  256:         if (find == NULL){
+     .      .  257: 	  fprintf(stderr, "Element not found in SortedList\n");
+     .      .  258: 	  exit(2);
+     .      .  259:         }
+     .      .  260:         SortedList_delete(find);	//perform operations
+     .      .  261:         pthread_mutex_unlock(&lock);	//unlock mutex
+     .      .  262:       } else if (spin == 1){
+     .      .  263:         struct timespec start;
+     .      .  264:         clock_gettime(CLOCK_MONOTONIC, &start);
+   211    211  265:         while(__sync_lock_test_and_set(&slock, 1));	//lock spin lock
+     .      .  266:         struct timespec finish;				//record lock time
+     .      1  267:         clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .  268:         long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .  269:         totaltime += finish.tv_nsec;
+     .      .  270:         totaltime -= start.tv_nsec;		//convert to nanoseconds
+     .      .  271:         locktimes[thread] += totaltime;		//store time
+     .     42  272:         SortedListElement_t * find = SortedList_lookup(list, listelements[i].key);
+     .      .  273:         if (find == NULL){
+     .      .  274: 	  fprintf(stderr, "Element not found in SortedList\n");
+     .      .  275: 	  exit(2);
+     .      .  276:         }
+     .      .  277:         SortedList_delete(find);		//perform operations
+     .      .  278:         __sync_lock_release(&slock);		//unlock spin lock
+     .      .  279:       } else {
+     .      .  280:         SortedListElement_t * find = SortedList_lookup(list, listelements[i].key);
+     .      .  281:         if (find == NULL){
+     .      .  282: 	  fprintf(stderr, "Element not found in SortedList\n");
+     .      .  283: 	  exit(2);
+     .      .  284:         }
+     .      .  285:         SortedList_delete(find);
+     .      .  286:       }
+     .      .  287:     }
+     .      .  288:   }
+     .      .  289: 
+     .      .  290:   return NULL;
+     .      .  291: }
+---
+     .      .  292: 
+     .      .  293: 
+     .      .  294: void keys(void){
+     .      .  295:   //create the seed
+     .      .  296:   srand(time(NULL));
+ROUTINE ====================== threadfunc in /u/ce/ugrad/adamc/111/P2/B/lab2_list.c
+   696    782 Total samples (flat / cumulative)
+     .      .   55:   hash = (key[0] + key[2]) % numlists;
+     .      .   56:   return hash;
+     .      .   57: }
+     .      .   58: 
+     .      .   59: //multithreading function
+---
+     .      .   60: void * threadfunc(void * t){
+     .      .   61:   long thread = (long)t;
+     .      .   62:   long s = thread * numiterations;
+     .      .   63:   long i = s;
+     .      .   64: 
+     .      .   65:   //insert each element into the SortedList
+     .      .   66:   if (lists){
+     .      .   67:     for (; i < s + numiterations; i++){
+     .      .   68:       const char * curr = listelements[i].key;		//get correct lock to wait on
+     .      .   69:       int hashval = hashing(curr);
+     .      .   70:       if (spin){
+     .      .   71:         struct timespec start;
+     .      .   72:         clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .   73:         while(__sync_lock_test_and_set(&slockArr[hashval], 1));	//lock spin lock
+     .      .   74:         struct timespec finish;					//record time
+     .      .   75:         clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .   76:         long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .   77:         totaltime += finish.tv_nsec;				//convert to nanoseconds
+     .      .   78:         totaltime -= start.tv_nsec;
+     .      .   79:         locktimes[thread] += totaltime;				//store time
+     .      .   80:         SortedList_insert(listArr[hashval], &listelements[i]);	//perform operation
+     .      .   81:         __sync_lock_release(&slockArr[hashval]);		//unlock spin lock
+     .      .   82:       } else if (mutex) {
+     .      .   83:         struct timespec start;
+     .      .   84:         clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .   85:         pthread_mutex_lock(&lockArr[hashval]);			//lock mutex
+     .      .   86:         struct timespec finish;					//record lock time
+     .      .   87:         clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .   88:         long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .   89:         totaltime += finish.tv_nsec;				//convert to nanoseconds
+     .      .   90:         totaltime -= start.tv_nsec;
+     .      .   91:         locktimes[thread] += totaltime;				//store time
+     .      .   92:         SortedList_insert(listArr[hashval], &listelements[i]);	//perform operation
+     .      .   93:         pthread_mutex_unlock(&lockArr[hashval]);		//unlock mutex
+     .      .   94:       } else {
+     .      .   95:         SortedList_insert(listArr[hashval], &listelements[i]);	//no time to record
+     .      .   96:       }
+     .      .   97:     }
+     .      .   98:   } else {	//single list
+     .      .   99:     for (; i < s + numiterations; i++){
+     .      .  100:       if(mutex == 1){
+     .      .  101: 	struct timespec start;
+     .      .  102:         clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  103:         pthread_mutex_lock(&lock);			//lock mutex
+     .      .  104: 	struct timespec finish;				//record lock time
+     .      .  105:         clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .  106: 	long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .  107:         totaltime += finish.tv_nsec;
+     .      .  108:         totaltime -= start.tv_nsec;			//convert to nanoseconds
+     .      .  109:         locktimes[thread] += totaltime;			//store time
+     .      .  110:         SortedList_insert(list, &listelements[i]);	//perform operation
+     .      .  111:         pthread_mutex_unlock(&lock);			//unlock mutex
+     .      .  112:       } else if (spin == 1){
+     .      .  113: 	struct timespec start;
+     .      .  114:         clock_gettime(CLOCK_MONOTONIC, &start);
+   483    483  115:         while(__sync_lock_test_and_set(&slock, 1));	//lock spin lock
+     .      .  116: 	struct timespec finish;				//record lock time
+     .      .  117:         clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .  118: 	long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .  119:         totaltime += finish.tv_nsec;
+     .      .  120:         totaltime -= start.tv_nsec;			//convert to nanoseconds
+     1      1  121:         locktimes[thread] += totaltime;			//store time
+     .     43  122:         SortedList_insert(list, &listelements[i]);	//perform operation
+     .      .  123:         __sync_lock_release(&slock);			//unlock spin lock
+     .      .  124:       } else {
+     .      .  125:         SortedList_insert(list, &listelements[i]);	//no time to record
+     .      .  126:       }
+     .      .  127:     }
+     .      .  128:   }
+     .      .  129:  
+     .      .  130: 
+     .      .  131:   //calculate the length of the list
+     .      .  132:   if (lists){
+     .      .  133:     int m = 0;
+     .      .  134:     for (; m < numlists; m++){
+     .      .  135:       if (spin){
+     .      .  136:         struct timespec start;
+     .      .  137:         clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  138:         while(__sync_lock_test_and_set(&slockArr[m], 1));	//lock spin lock
+     .      .  139:         struct timespec finish;					//record time
+     .      .  140:         clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .  141:         long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .  142:         totaltime += finish.tv_nsec;			//convert to nanoseconds
+     .      .  143:         totaltime -= start.tv_nsec;
+     .      .  144:         locktimes[thread] += totaltime;			//store time
+     .      .  145:         SortedList_length(listArr[m]); 			//perform operation
+     .      .  146:         __sync_lock_release(&slockArr[m]);		//unlock spin lock
+     .      .  147:       } else if (mutex) {
+     .      .  148:         struct timespec start;
+     .      .  149:         clock_gettime(CLOCK_MONOTONIC, &start);		//record time
+     .      .  150:         pthread_mutex_lock(&lockArr[m]);		//lock mutex
+     .      .  151:         struct timespec finish;
+     .      .  152:         clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .  153:         long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .  154:         totaltime += finish.tv_nsec;			//convert to nanoseconds
+     .      .  155:         totaltime -= start.tv_nsec;
+     .      .  156:         locktimes[thread] += totaltime;			//store time
+     .      .  157:         SortedList_length(listArr[m]);			//perform operation
+     .      .  158:         pthread_mutex_unlock(&lockArr[m]);		//unlock mutex
+     .      .  159:       } else {
+     .      .  160:         SortedList_length(listArr[m]);			//no time to record
+     .      .  161:       }
+     .      .  162:     }
+     .      .  163:   } else {              //single list
+     .      .  164:     if (mutex == 1){
+     .      .  165:       struct timespec start;
+     .      .  166:       clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  167:       pthread_mutex_lock(&lock);		//lock mutex
+     .      .  168:       struct timespec finish;			//record lock time
+     .      .  169:       clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .  170:       long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .  171:       totaltime += finish.tv_nsec;
+     .      .  172:       totaltime -= start.tv_nsec;		//convert to nanoseconds
+     .      .  173:       locktimes[thread] += totaltime;		//store time
+     .      .  174:       SortedList_length(list);		//perform operation
+     .      .  175:       pthread_mutex_unlock(&lock);	//lock mutex
+     .      .  176:     } else if (spin == 1){
+     .      .  177:       struct timespec start;
+     .      .  178:       clock_gettime(CLOCK_MONOTONIC, &start);
+     1      1  179:       while(__sync_lock_test_and_set(&slock, 1));	//lock spin lock
+     .      .  180:       struct timespec finish;				//record lock time
+     .      .  181:       clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .  182:       long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .  183:       totaltime += finish.tv_nsec;
+     .      .  184:       totaltime -= start.tv_nsec;		//convert to nanoseconds
+     .      .  185:       locktimes[thread] += totaltime;		//store time
+     .      .  186:       SortedList_length(list);		//perform operation
+     .      .  187:       __sync_lock_release(&slock);	//unlock spin lock
+     .      .  188:     } else {
+     .      .  189:       SortedList_length(list);
+     .      .  190:     }
+     .      .  191:   }
+     .      .  192:   
+     .      .  193: 
+     .      .  194:   i = s;
+     .      .  195:   //lookup and delete each element in the list
+     .      .  196:   if (lists){
+     .      .  197:     for (; i < s + numiterations; i++){
+     .      .  198:       const char * curr = listelements[i].key;		//get correct lock to wait on
+     .      .  199:       int hashval = hashing(curr);
+     .      .  200:       if (spin){
+     .      .  201:         struct timespec start;
+     .      .  202:         clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  203:         while(__sync_lock_test_and_set(&slockArr[hashval], 1));	//lock spin lock
+     .      .  204:         struct timespec finish;					//record time
+     .      .  205:         clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .  206:         long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .  207:         totaltime += finish.tv_nsec;				//convert to nanoseconds
+     .      .  208:         totaltime -= start.tv_nsec;
+     .      .  209:         locktimes[thread] += totaltime;				//store time
+     .      .  210:         SortedListElement_t * find = SortedList_lookup(listArr[hashval], listelements[i].key);
+     .      .  211:         if (find == NULL){
+     .      .  212: 	  fprintf(stderr, "Element not found in SortedList\n");
+     .      .  213: 	  exit(2);
+     .      .  214:         }
+     .      .  215:         SortedList_delete(find);				//perform operations
+     .      .  216:         __sync_lock_release(&slockArr[hashval]);		//unlock spin lock
+     .      .  217:       } else if (mutex) {
+     .      .  218:         struct timespec start;
+     .      .  219:         clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  220:         pthread_mutex_lock(&lockArr[hashval]);			//lock mutex
+     .      .  221:         struct timespec finish;					//record lock time
+     .      .  222:         clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .  223:         long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .  224:         totaltime += finish.tv_nsec;				//convert to nanoseconds
+     .      .  225:         totaltime -= start.tv_nsec;
+     .      .  226:         locktimes[thread] += totaltime;				//store time
+     .      .  227:         SortedListElement_t * find = SortedList_lookup(listArr[hashval], listelements[i].key);
+     .      .  228:         if (find == NULL){
+     .      .  229: 	  fprintf(stderr, "Element not found in SortedList\n");
+     .      .  230: 	  exit(2);
+     .      .  231:         }
+     .      .  232:         SortedList_delete(find);				//perform operations
+     .      .  233:         pthread_mutex_unlock(&lockArr[hashval]);		//unlock mutex
+     .      .  234:       } else {							//no time to record
+     .      .  235:         SortedListElement_t * find = SortedList_lookup(listArr[hashval], listelements[i].key);
+     .      .  236:         if (find == NULL){
+     .      .  237: 	  fprintf(stderr, "Element not found in SortedList\n");
+     .      .  238: 	  exit(2);
+     .      .  239:         }
+     .      .  240:         SortedList_delete(find);				//perform operations
+     .      .  241:       }
+     .      .  242:     }
+     .      .  243:   } else {             //single list
+     .      .  244:     for (; i < s + numiterations; i++){
+     .      .  245:       if (mutex == 1){
+     .      .  246:         struct timespec start;
+     .      .  247:         clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  248:         pthread_mutex_lock(&lock);		//lock mutex
+     .      .  249:         struct timespec finish;			//record lock time
+     .      .  250:         clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .  251:         long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .  252:         totaltime += finish.tv_nsec;
+     .      .  253:         totaltime -= start.tv_nsec;		//convert to nanoseconds
+     .      .  254:         locktimes[thread] += totaltime;		//store time
+     .      .  255:         SortedListElement_t * find = SortedList_lookup(list, listelements[i].key);
+     .      .  256:         if (find == NULL){
+     .      .  257: 	  fprintf(stderr, "Element not found in SortedList\n");
+     .      .  258: 	  exit(2);
+     .      .  259:         }
+     .      .  260:         SortedList_delete(find);	//perform operations
+     .      .  261:         pthread_mutex_unlock(&lock);	//unlock mutex
+     .      .  262:       } else if (spin == 1){
+     .      .  263:         struct timespec start;
+     .      .  264:         clock_gettime(CLOCK_MONOTONIC, &start);
+   211    211  265:         while(__sync_lock_test_and_set(&slock, 1));	//lock spin lock
+     .      .  266:         struct timespec finish;				//record lock time
+     .      1  267:         clock_gettime(CLOCK_MONOTONIC, &finish);
+     .      .  268:         long long totaltime = (finish.tv_sec - start.tv_sec) * 1000000000;
+     .      .  269:         totaltime += finish.tv_nsec;
+     .      .  270:         totaltime -= start.tv_nsec;		//convert to nanoseconds
+     .      .  271:         locktimes[thread] += totaltime;		//store time
+     .     42  272:         SortedListElement_t * find = SortedList_lookup(list, listelements[i].key);
+     .      .  273:         if (find == NULL){
+     .      .  274: 	  fprintf(stderr, "Element not found in SortedList\n");
+     .      .  275: 	  exit(2);
+     .      .  276:         }
+     .      .  277:         SortedList_delete(find);		//perform operations
+     .      .  278:         __sync_lock_release(&slock);		//unlock spin lock
+     .      .  279:       } else {
+     .      .  280:         SortedListElement_t * find = SortedList_lookup(list, listelements[i].key);
+     .      .  281:         if (find == NULL){
+     .      .  282: 	  fprintf(stderr, "Element not found in SortedList\n");
+     .      .  283: 	  exit(2);
+     .      .  284:         }
+     .      .  285:         SortedList_delete(find);
+     .      .  286:       }
+     .      .  287:     }
+     .      .  288:   }
+     .      .  289: 
+     .      .  290:   return NULL;
+     .      .  291: }
+---
+     .      .  292: 
+     .      .  293: 
+     .      .  294: void keys(void){
+     .      .  295:   //create the seed
+     .      .  296:   srand(time(NULL));

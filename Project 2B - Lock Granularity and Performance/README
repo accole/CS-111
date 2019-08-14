@@ -1,0 +1,120 @@
+NAME: Adam Cole
+EMAIL: adam.cole5621@gmail.com
+ID: 004912373
+
+QUESTION 2.3.1 - CPU Time in Basic List:
+	When there's only 1-2 threads running, very little preemption occurs.
+	In other words, there are very few threads waiting on locks or switching
+	between thread contexts.  Knowing this, the most time is most likely
+	spent executing the instructions which insert, lookup, and delete the
+	elements of the linked lists.  While the executing code is not the
+	most expensive when high numbers of threads are executed, the directly
+	executed code is the most expensive for low thread numbers with little
+	to no waiting.  For high thread spin lock tests, most CPU time will be
+	wasted spinning waiting for the locks to be acquired be each thread.
+	For high level mutex cases, however, the most CPU time will also be
+	used in the direct execution of inserting, searching, and deleting
+	elements from the lists.  This is because when threads wait on mutexes,
+	the threads go to sleep and don't waste CPU cycles like spin locks do.
+
+QUESTION 2.3.2 - Execution Profiling:
+	Through execution profiling with gperftools, profile.out reports that
+	the CPU spends the most amount of time spinning waiting for the lock
+	as expected from question 2.3.1.  Specifically, in the line of code:
+	   while(__sync_lock_test_and_set(&spinLockVar, 1));
+	This line of code becomes more and more expensive with larger numbers
+	of threads because the contention for the same lock increases, which
+	makes threads that access the lock last have to spin for longer and
+	longer times.  More and more cycles get wasted, and the increased
+	overhead caused from context switching threads does not help.
+
+QUESTION 2.3.3 - Mutex Wait Time:
+	 The lock acquisition wait time becomes worse and worse as the number
+	 of threads increases because contention for the same resource also
+	 increases.  When a thread waits on a mutex, the thread is put in a 
+	 queue and put to sleep.  As more and more threads are executed, any
+	 given thread will have to wait on more and more threads ahead of it
+	 in the queue to finish execution before aquiring the resource.  Due
+	 to this, the lock wait time increases.	 The completion time does not
+	 increase with the same ferocity as the wait acquisition time does, 
+	 however, and this is because the completion time per operation relies
+	 on instructions other than those to aquire the lock.  Lock time is
+	 directly affected by the number of threads because the number of threads
+	 is the only thing that determines the amount of time a thread must
+	 wait to acquire - but completion time also depends on the CPU time
+	 taken to directly execute the code.  Since completion time depends on
+	 the number of threads, but less than wait time, completion time
+	 increases with the number of threads, but not as drastically.  
+
+QUESTION 2.3.4 - Performance of Partitioned Lists:
+	The throughput increased with the number of lists used. This is intuitive
+	because as the number of lists increase, the number of conflicts in
+	critical sections decrease.  This results in less wait time for lock
+	acquisition, and improves performance with increased throughput.  This
+	trend will continue until a certain limit - the upper bound being when
+	the number of lists = number of threads.  This is because if each thread
+	has its own list, there will be no waiting for locks.  After this threshold,
+	the for loops with more and more lists will only increase the CPU load
+	and the benefits of distributing the critical section will no longer
+	optimize the program.  The graph supports the claim that a single list
+	with 1/N as many threads has throughput equivalent to an N-way partitioned
+	list.  This is because the amount of time spent locking with multiple
+	threads and multiple lists evens out the CPU load equivalently as a
+	single list that avoids lock waiting (1/N) times less.
+
+lab2_list.c
+	When compiled, lab2_list runs performance tests on a complex shared
+	doubley linked list with different synchronization locking tools.
+	The executable has options to yield, synchronize with distinct locks,
+	and users distinguish the amount of threads and iterations the
+	program will use to analyze the outcome with the shared list. Instead
+	of one function to update the shared list, the program will insert, 
+	traverse, search, and delete elements from the linked list.  Users
+	have the options to yield in any or all of these functions through the
+	--yield=SECTIONS command line option.  Users also have the option to
+	measure performance by using multiple sublists to distribute the
+	shared list resource using the --lists=NUMLISTS option.
+
+SortedList.h
+	Header file given in the spec which defines the doubley linked list
+	and its available functions.  Here, INSERT_YIELD, DELETE_YIELD, and
+	LOOKUP_YIELD are all defined.
+
+SortedList.c
+	Implementations of the header file functions insert, search, delete,
+	and length which are defined in the header file provided.  Each of
+	these functions includes critical sections which are synchronized by
+	locks used in lab2_list and through YIELD options defined in the
+	implementations.
+
+lab2_list.gp
+	GNUplot file which creates lab2b_1.png - lab2b_5.png plots with the
+	given data in lab2b_list.csv file.  Template taken from the given
+	lab2_list.gp file from project 2A with changed axis names etc.
+
+lab2b_list.csv
+	CSV file containing the output data from make tests run on lab2_list
+	and is used by lab2_list.gp to create plots
+
+profile.out
+	Execution profiling report showing where CPU time was spent in the
+	un-partitioned spin lock implementation using Google's gperftools.
+
+lab2b_1.png
+lab2b_2.png
+lab2b_3.png
+lab2b_4.png
+lab2b_5.png
+	Output graphs based on performance of different synchronization
+	tactics created with given lab2_list.gp source code.
+
+Makefile
+
+	build:  compiles and builds executables for both lab2_add.c and
+		lab2_list.c using gcc and the correct flags
+	tests:	runs the tests given by the spec to test lab2_add and lab2_list
+	graphs:	builds, cleans, and tests the executables lab2_add and lab2_list
+		then creates GNUplots using lab2_add.gp and lab2_list.gp
+	dist:	creates a tarbell for submission
+	clean:  cleans the current directory to contain only the submission
+		files
