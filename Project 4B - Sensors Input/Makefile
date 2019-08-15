@@ -1,6 +1,6 @@
 #NAME: Adam Cole
-#EMAIL: adam.cole5621@gmail.com
-#ID: 004912373
+#EMAIL: ############@gmail.com
+#ID: #########
 
 CC = gcc
 CFLAGS = -Wall -Wextra -g -lmraa -lm
@@ -20,7 +20,7 @@ check:
 	fi
 
 clean:
-	rm -f lab4b lab4b-004912373.tar.gz
+	rm -f lab4b *.tar.gz
 
 dist:
-	tar -czvf lab4b-004912373.tar.gz $(files)
+	tar -czvf lab4b-#########.tar.gz $(files)
