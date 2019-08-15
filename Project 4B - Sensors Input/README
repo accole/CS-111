@@ -1,0 +1,19 @@
+NAME: Adam Cole
+EMAIL: adam.cole5621@gmail.com
+ID: 004912373
+
+Makefile:
+	default:  creates an executable lab4b
+	clean:	  cleans the repository to remove lab4b and the
+		  distribution tar
+	dist:	  creates the distribution tar file for submission
+	check:	  runs a smoke test on the program
+
+
+lab4b.c
+	Source code, when compiled, reads input from user and outputs
+	the temperature and time of reading at a given time interval
+	PERIOD signified through an option.  The --scale option can
+	also be used to switch between Celcius and Farenheit.  If the
+	--log=LOGFILE option is used, all commands and outputs will be
+	logged to the file.
