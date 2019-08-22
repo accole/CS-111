@@ -1,0 +1,53 @@
+NAME: Adam Cole
+EMAIL: adam.cole5621@gmail.com
+ID: 004912373
+
+lab1b-client.c
+
+	A source file that, when compiled, executes the local client to
+	connect to the server on a specified --port=PORT.  The client
+	will log user keystrokes on the console until a user inputs an
+	EOF (^D) or kill (^C). After connecting to the server, the client
+	will send input to the server and print the output of the program
+	executed by the server.  If the --log=FILE option is used, the
+	client will log the bytes sent and received between the client
+	and the server in FILE.  If the --encrypt=KEYFILE option is used,
+	the client will encrypt the data send to the server using the
+	keyfile specified in the argument.
+
+lab1b-server.c
+
+	A source file that, when compiled, executes the local server
+	on a specified --port=PORT, which is required.  The server will
+	execute /bin/bash to execute a shell.  If the --encrypt=KEYFILE
+	option is used, the server will encrypt the data sent to the
+	client using the keyfile specified in the argument.  The server
+	will report the shell exit status and signal when the client
+	sends an EOF (^D) or kill (^C). 
+
+my.key
+
+	Contains the encryption key to encrypt and decrypt data sent from
+	the client to the server and back using twofish cfb encryption
+	sessions
+
+Makefile
+
+	default: compiles and builds executables for both lab1b-server.c
+	         and lab1b-client.c using gcc and the correct flags.
+	client:  compiles and builds only the lab1b-client.c executable
+	server:  compiles and builds only the lab1b-server.c executable
+	clean:   cleans the current directory to contain only the
+		 submission files README, Makefile, my.key, lab1b-server.c
+		 and lab1b-client.c
+	dist:	 creates a tarbell for submission with files README,
+		 Makefile, my.key, lab1b-client.c, lab1b-server.c
+
+Usage
+	$ ./lab1b-server --port=4500 --encrypt=my.key
+	$ ./lab1b-client --port=4500 --log=log.txt --encrypt=my.key
+
+References
+
+	Zhou and Tiard TA Slides
+	Manual pages for all library API
