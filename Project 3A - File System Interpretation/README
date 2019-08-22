@@ -1,0 +1,20 @@
+NAME: Adam Cole, Jake Wallin
+EMAIL: adam.cole5621@gmail.com, jakewallin82@gmail.com
+ID: 004912373, 404979154
+
+lab3a.c
+
+	A source file, which when compiled, reads a file system image given
+	in command line arguments.  The program will analyze the file system
+	and summarizes the file system storage through print statements.
+	Parts of the summary include the superblock, group summary, free
+	I-node entries, I-node summary, directory entries, and indirect block
+	entries.
+
+Makefile
+
+	default:  compiles and builds an executable from lab3a.c using
+		  gcc and correct flags described in the project spec.
+	clean:    cleans the current directory and removes previously
+		  compiled executables and submission tarbells
+	dist:	  creates a tarbell for submission (README, Makefile, lab3a.c)
