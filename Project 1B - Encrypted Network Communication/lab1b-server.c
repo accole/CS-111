@@ -1,6 +1,6 @@
 //NAME: Adam Cole
-//EMAIL: adam.cole5621@gmail.com
-//ID: 004912373
+//EMAIL: #############@gmail.com
+//ID: #########
 
 //server
 
