@@ -1,6 +1,6 @@
 //NAME: Adam Cole, Jake Wallin
-//EMAIL: adam.cole5621@gmail.com, jakewallin82@gmail.com
-//ID: 004912373, 404979154
+//EMAIL: ###########@gmail.com, ###########@gmail.com
+//ID: #########, #########
 
 #include <errno.h>
 #include <stdio.h>
@@ -24,7 +24,7 @@ int BLOCKCOUNT;                     //number of blocks
 int INODESCOUNT;                    //number of inodes
 int BLOCKpGROUP;                    //blocks per group
 int INODESpGROUP;                   //inodes per group
-int NUMGROUPS = 1;                      //total number of groups
+int NUMGROUPS = 1;                  //total number of groups
 
 
 
