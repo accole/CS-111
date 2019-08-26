@@ -10,9 +10,9 @@ Project 1A  -    94/100
 
 Project 1B  -   100/100
 
-Project 2A  -   
+Project 2A  -    84/100
 
-Project 2B  -    
+Project 2B  -    95/100
 
 Project 3A  -    
  
