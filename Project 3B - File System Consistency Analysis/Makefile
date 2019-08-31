@@ -1,6 +1,6 @@
 #NAME: Adam Cole, Jake Wallin
-#EMAIL: adam.cole5621@gmail.com, jakewallin82@gmail.com
-#ID: 004912373, 404979154
+#EMAIL: ############@gmail.com, ############@gmail.com
+#ID: #########, #########
 
 SOURCE = lab3b.py
 DEST = lab3b
@@ -17,4 +17,4 @@ clean:
 	rm -f lab3b *.tar.gz *~
 
 dist: 
-	tar -cvzf lab3b-004912373.tar.gz lab3b.py Makefile README
+	tar -cvzf lab3b-#########.tar.gz lab3b.py Makefile README
