@@ -1,0 +1,15 @@
+NAME: Adam Cole, Jake Wallin
+EMAIL: adam.cole5621@gmail.com, jakewallin82@gmail.com
+ID: 004912373, 404979154
+
+lab3b.py:
+
+	Source code in python that analyzes a file system summary in order to find
+	inconsistencies by conducting Block Consistency Audits, I-node Allocation
+	Audits, and Directory Consistency Audits.
+
+Makefile:
+
+	default:  normally compile the program
+	dist:     build the tarball including lab3b.py, Makefile, and README
+	clean:    remove all files that are made by the Makefile
