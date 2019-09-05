@@ -1,30 +1,29 @@
 NAME: Adam Cole
-EMAIL: adam.cole5621@gmail.com
-ID: 004912373
+EMAIL: ##############@gmail.com
+ID: #########
 
 4c_tcp.c
-
 	A source file, which when compiled, creates an executable for
 	part 1 of lab 4C.  In this part, a TCP socket is used to connect
 	to the SEASNET server and send packets of information over the
 	network.
 
 4c_tls.c
-
 	A source file, which when compiled, creates an executable for
 	part 2 of lab 4C.  In this part, which is a modification of the
 	source in 4c_tcp.c, the OpenSSL Library is used for security and
 	encryption over the network.
 
 Makefile
-
 	default:  creates executables lab4c_tcp and lab4c_tls from
 		  the source files
 	clean:    cleans current directory to remove lab4b_tls and
 		  lab4c_tcp and previous tar files
 	dist:     creates the distribution tar file for submission
 
-
 NOTE***
-
 	sudo must be used to get past segfault in mraa_read_aio in sanity check
+	
+Server Info
+	HOST = lever.cs.ucla.edu
+	PORT = 18000 (TCP) 19000 (TLS)
