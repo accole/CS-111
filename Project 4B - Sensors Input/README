@@ -17,3 +17,6 @@ lab4b.c
 	also be used to switch between Celcius and Farenheit.  If the
 	--log=LOGFILE option is used, all commands and outputs will be
 	logged to the file.
+
+NOTE****
+	sudo needed to get past mraa_read_aio() segfault in sanity check
