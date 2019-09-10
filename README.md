@@ -14,13 +14,13 @@ Project 2A  -    84/100
 
 Project 2B  -    95/100
 
-Project 3A  -    
+Project 3A  -    94/100
  
-Project 3B  -   
+Project 3B  -    70/100
 
 Project 4A  -   100/100
 
-Project 4B  - 
+Project 4B  -    95/100
 
-Project 4C  - 
+Project 4C  -    98/100
 
